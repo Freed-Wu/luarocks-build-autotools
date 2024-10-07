@@ -24,7 +24,8 @@ jobs:
             --force
           version: scm
           dependencies: |
-            LuaFileSystem
+            luarocks
+            luafilesystem
       - uses: nvim-neorocks/luarocks-tag-release@v5
         env:
           LUAROCKS_API_KEY: ${{secrets.LUAROCKS_API_KEY}}
@@ -33,4 +34,5 @@ jobs:
           extra_luarocks_args: |
             --force
           dependencies: |
-            LuaFileSystem
+            luarocks
+            luafilesystem
