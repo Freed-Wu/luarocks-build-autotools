@@ -40,15 +40,24 @@ function M.run(rockspec, no_install)
     local libdir = path.lib_dir(rockspec.name, rockspec.version)
     local luadir = path.lua_dir(rockspec.name, rockspec.version)
     if do_build then
-        autotools_variables.CFLAGS = autotools_variables.CFLAGS or cfg.variables.CFLAGS
-        autotools_variables.LUA_INCDIR = autotools_variables.LUA_INCDIR or cfg.variables.LUA_INCDIR
-        autotools_variables.PREFIX = autotools_variables.PREFIX or cfg.home_tree
-        autotools_variables.LIBDIR = autotools_variables.LIBDIR or libdir
-        autotools_variables.LUADIR = autotools_variables.LUADIR or luadir
-        local cmd = "CFLAGS='" .. autotools_variables.CFLAGS .. " -I" ..
-            autotools_variables.LUA_INCDIR .. "' ./configure --prefix=" ..
-            autotools_variables.PREFIX ..
-            " --libdir=" .. autotools_variables.LIBDIR .. " --datadir=" .. autotools_variables.LUADIR
+        autotools_variables.CFLAGS = autotools_variables.CFLAGS or cfg.variables.CFLAGS or "",
+        if autotools_variables.LUA_INCDIR != nil then
+            autotools_variables.CFLAGS = string.format(
+                [[%s -I%s]],
+                autotools_variables.CFLAGS,
+                autotools_variables.LUA_INCDIR or cfg.variables.LUA_INCDIR,
+            )
+        end
+        autotools_variables.PREFIX = autotools_variables.PREFIX or cfg.home_tree or cfg.root_dir or ""
+        autotools_variables.LIBDIR = autotools_variables.LIBDIR or libdir or ""
+        autotools_variables.LUADIR = autotools_variables.LUADIR or luadir or ""
+        local cmd = string.format(
+            [[CFLAGS='%s' ./configure --prefix='%s' --libdir='%s' --datadir='%s']],
+            autotools_variables.CFLAGS,
+            autotools_variables.PREFIX,
+            autotools_variables.LIBDIR,
+            autotools_variables.LUADIR,
+        )
         for _, command in ipairs { cmd, "make clean", "make" } do
             if os.execute(command) ~= 0 then
                 return nil, "failed to run: " .. command
